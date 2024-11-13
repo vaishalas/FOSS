@@ -1,0 +1,62 @@
+
+
+Get all items
+
+```
+query {
+  getItems {
+    id
+    title
+    author
+  }
+}
+```
+
+
+Get a specific item:
+
+```
+query {
+  getItem(id: "1") {
+    id
+    title
+    author
+  }
+}
+```
+
+Add a new item:
+
+```
+mutation {
+  addItem(title: "Fahrenheit 451", author: "Ray Bradbury") {
+    id
+    title
+    author
+  }
+}
+```
+
+Update an item:
+
+```
+mutation {
+  updateItem(id: "1", title: "Nineteen Eighty-Four") {
+    id
+    title
+    author
+  }
+}
+```
+
+Delete an item:
+```
+mutation {
+  deleteItem(id: "2") {
+    id
+    title
+    author
+  }
+}
+
+```
