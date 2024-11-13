@@ -1,0 +1,52 @@
+---
+- name: Setup Node.js GraphQL Server
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Node.js and npm
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - nodejs
+        - npm
+
+    - name: Install PM2 to manage Node.js applications globally
+      npm:
+        name: pm2
+        global: yes
+
+    - name: Clone the GraphQL application from GitHub
+      git:
+        repo: https://github.com/vaishalas/Exp-4.git
+        dest: "{{ ansible_env.PWD }}"  # Clones into the current directory
+        version: main  # Adjust if a different branch is needed
+
+    - name: Install application dependencies
+      npm:
+        path: "{{ ansible_env.PWD }}"  # Ensures dependencies are installed in the cloned directory
+        state: present
+
+    - name: Start the application with PM2
+      command: pm2 start {{ ansible_env.PWD }}/index.js --name graphql-server
+      args:
+        creates: /root/.pm2/logs/graphql-server-out.log  # Ensures it only starts if not already running
+
+    - name: Ensure PM2 starts on system reboot
+      command: pm2 startup systemd
+
+    - name: Save the PM2 process list for automatic restart
+      command: pm2 save
+
+    - name: Open the firewall for GraphQL server port
+      ufw:
+        rule: allow
+        port: 4000
+        proto: tcp
+        state: enabled
+      when: ansible_facts['os_family'] == "Debian"  # Adjust based on your server's OS
